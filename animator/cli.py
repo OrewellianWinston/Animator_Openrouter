@@ -124,7 +124,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--scenes", type=int, default=None,
                         help="number of scenes when using --prompt (default: let the model decide)")
     parser.add_argument("--voice", default=None,
-                        help="TTS voice for --prompt narration (default: $ANIMATOR_VOICE or 'af_heart'). "
+                        help="TTS voice for --prompt narration (default: $ANIMATOR_VOICE or 'sarah'). "
                              "Voices are model-specific, e.g. Kokoro 'af_heart', 'am_adam'; ElevenLabs 'sarah'; see "
                              "https://openrouter.ai/api/v1/models?output_modalities=speech "
                              "(supported_voices)")

@@ -21,6 +21,9 @@ _HEADERS = {"HTTP-Referer": "https://github.com/ashishjamarkattel/Animator", "X-
 
 T = TypeVar("T", bound=BaseModel)
 
+# tries per structured request when the output is not valid JSON for the schema
+STRUCTURED_ATTEMPTS = 3
+
 
 @dataclass
 class AIClient:
@@ -64,6 +67,10 @@ async def with_retry_async(call):
                 raise
             logger.warning("AI call failed (%s); retry %s/%s", exc, attempt, MAX_RETRIES)
             await asyncio.sleep(RETRY_DELAY_SEC * attempt)
+
+
+# Some providers (e.g. Alibaba) only honour JSON output when a message mentions "json".
+JSON_SYSTEM_MESSAGE = {"role": "system", "content": "Reply with a single JSON object that matches the given schema."}
 
 
 def json_response_format(name: str, model: Type[BaseModel]) -> dict:
@@ -115,7 +122,7 @@ def parse_json_model(text: str, model: Type[T], prepare: Optional[Callable[[Any]
 def request_structured(call, model: Type[T], what: str, prepare=None) -> T:
     """Run `call()` (a blocking chat completion), parse JSON; retry once on bad output."""
     raw = ""
-    for _ in range(2):
+    for _ in range(STRUCTURED_ATTEMPTS):
         raw = message_text(with_retry(call))
         try:
             return parse_json_model(raw, model, prepare)
@@ -127,7 +134,7 @@ def request_structured(call, model: Type[T], what: str, prepare=None) -> T:
 async def request_structured_async(call, model: Type[T], what: str, prepare=None) -> T:
     """Async twin of request_structured; `call()` returns an awaitable completion."""
     raw = ""
-    for _ in range(2):
+    for _ in range(STRUCTURED_ATTEMPTS):
         raw = message_text(await with_retry_async(call))
         try:
             return parse_json_model(raw, model, prepare)

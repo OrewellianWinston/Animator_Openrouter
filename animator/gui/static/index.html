@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Animator</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Animator</h1>
+    <div class="spacer"></div>
+    <button id="balance" class="pill" title="Click to refresh">balance…</button>
+    <button id="settings-btn" class="icon-btn" aria-label="Settings" title="Settings">&#9881;</button>
+  </header>
+
+  <main class="layout">
+    <section class="main-col">
+      <form id="form" class="card" autocomplete="off">
+        <h2>New video</h2>
+        <label class="field">
+          <span class="label">What should it explain?</span>
+          <textarea id="prompt" rows="4" maxlength="2000" placeholder="how a rainbow forms"></textarea>
+        </label>
+
+        <div class="row">
+          <label class="field">
+            <span class="label">Scenes</span>
+            <select id="scenes"></select>
+          </label>
+          <label class="field">
+            <span class="label">Quality</span>
+            <select id="quality">
+              <option value="low">Low (fast)</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="field">
+          <span class="label" id="preset-label">Models</span>
+          <div id="presets" class="segmented" role="radiogroup" aria-labelledby="preset-label"></div>
+          <p id="cost" class="hint"></p>
+        </div>
+
+        <details id="advanced">
+          <summary>Advanced</summary>
+          <div class="grid">
+            <label class="field"><span class="label">Storyboard model</span><input id="m-text" spellcheck="false"></label>
+            <label class="field"><span class="label">Region model</span><input id="m-region" spellcheck="false"></label>
+            <label class="field"><span class="label">Image model</span><input id="m-image" spellcheck="false"></label>
+            <label class="field"><span class="label">Speech model</span><input id="m-tts" spellcheck="false"></label>
+            <label class="field"><span class="label">Voice</span>
+              <input id="voice" list="voice-list" spellcheck="false">
+              <datalist id="voice-list"></datalist>
+            </label>
+          </div>
+        </details>
+
+        <div class="actions">
+          <button id="generate" type="submit" class="primary">Generate</button>
+          <span id="reason" class="hint"></span>
+        </div>
+        <p id="form-error" class="error" role="alert" hidden></p>
+      </form>
+
+      <section id="progress" class="card" hidden aria-live="polite">
+        <div class="card-head">
+          <h2 id="progress-title">Working…</h2>
+          <span id="elapsed" class="muted"></span>
+          <button id="cancel" type="button" class="ghost">Cancel</button>
+        </div>
+        <ol id="steps" class="steps">
+          <li data-step="storyboard">Storyboard</li>
+          <li data-step="scenes">Scenes <span id="scene-count"></span></li>
+          <li data-step="render">Render</li>
+          <li data-step="done">Done</li>
+        </ol>
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div id="bar-fill"></div></div>
+        <p id="job-error" class="error" role="alert" hidden></p>
+        <details id="log-wrap">
+          <summary>Log</summary>
+          <pre id="log" tabindex="0"></pre>
+        </details>
+      </section>
+
+      <section id="result" class="card" hidden>
+        <div class="card-head">
+          <h2 id="result-title">Result</h2>
+          <button id="open-folder" type="button" class="ghost">Open folder</button>
+        </div>
+        <video id="player" controls preload="metadata"></video>
+        <div id="thumbs" class="thumbs"></div>
+      </section>
+    </section>
+
+    <aside class="side-col">
+      <div class="card">
+        <h2>History</h2>
+        <div id="history" class="history"></div>
+        <p id="history-empty" class="muted" hidden>Nothing here yet.</p>
+      </div>
+    </aside>
+  </main>
+
+  <dialog id="settings">
+    <form method="dialog" id="key-form">
+      <h2>Settings</h2>
+      <label class="field">
+        <span class="label">OpenRouter API key</span>
+        <input id="key-input" type="password" placeholder="sk-or-..." spellcheck="false" autocomplete="off">
+      </label>
+      <p id="key-status" class="hint"></p>
+      <p id="key-error" class="error" role="alert" hidden></p>
+      <div class="actions end">
+        <button type="button" id="key-close" class="ghost">Close</button>
+        <button type="submit" id="key-save" class="primary small">Save key</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

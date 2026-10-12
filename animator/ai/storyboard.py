@@ -5,7 +5,7 @@ import logging
 from typing import List, Optional
 
 from ..prompts import load_prompt
-from .client import AIClient, json_response_format, request_structured
+from .client import JSON_SYSTEM_MESSAGE, AIClient, json_response_format, request_structured
 from .schemas import StoryboardPlan
 from .settings import DEFAULT_TEXT_MODEL
 
@@ -34,7 +34,7 @@ def request_storyboard(client: AIClient, prompt: str, model: str) -> StoryboardP
     plan = request_structured(
         lambda: client.sync.chat.completions.create(
             model=model,
-            messages=[{"role": "user", "content": prompt}],
+            messages=[JSON_SYSTEM_MESSAGE, {"role": "user", "content": prompt}],
             response_format=json_response_format("storyboard", StoryboardPlan),
         ),
         StoryboardPlan,

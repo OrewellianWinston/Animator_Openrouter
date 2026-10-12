@@ -10,7 +10,7 @@ from PIL import Image
 
 from ..prompts import load_prompt
 from ..regions import Region, SnippetRegionPlan
-from .client import AIClient, json_response_format, request_structured_async
+from .client import JSON_SYSTEM_MESSAGE, AIClient, json_response_format, request_structured_async
 from .schemas import DetectedRegion, DetectionResponse
 from .settings import DEFAULT_REGION_MODEL
 
@@ -51,6 +51,9 @@ def sanitize_boxes(data: Any) -> Any:
         for low, high in (("ymin", "ymax"), ("xmin", "xmax")):
             if low in box and high in box and box[low] > box[high]:
                 box[low], box[high] = box[high], box[low]
+    if not regions:
+        # vision models occasionally answer with an empty list; treat it as bad output so it is retried
+        raise ValueError("no regions in response")
     return data
 
 
@@ -73,7 +76,7 @@ async def detect_region_plan(
     parsed = await request_structured_async(
         lambda: client.aio.chat.completions.create(
             model=model,
-            messages=[{"role": "user", "content": [
+            messages=[JSON_SYSTEM_MESSAGE, {"role": "user", "content": [
                 {"type": "image_url", "image_url": {"url": data_url}},
                 {"type": "text", "text": prompt},
             ]}],
